@@ -16,7 +16,7 @@ type Database struct {
 }
 
 // getPGOptions takes the given database options loaded from the .env file and returns an options struct for the ORM
-func (db *Database) getPGOptions() *pg.Options {
+func (db *Database) PGOptions() *pg.Options {
 	return &pg.Options{
 		Addr: db.Host + ":" + db.Port,
 		User: db.User,
