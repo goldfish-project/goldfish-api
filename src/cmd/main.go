@@ -6,12 +6,13 @@ import (
 	"github.com/go-pg/pg/v10/orm"
 	"github.com/gorilla/mux"
 	"goldfish-api/internal/core/domain"
+	"goldfish-api/internal/respositories/postgres"
 	"net/http"
 )
 
 func init() {
 	fmt.Println("Init...")
-	orm.RegisterTable((*domain.WorkspaceToUser)(nil))
+	orm.RegisterTable((*postgres.WorkspaceToUser)(nil))
 	fmt.Println("Done...")
 }
 
@@ -47,9 +48,10 @@ func createSchema(db *pg.DB) error {
 	orm.RegisterTable((*domain.WorkspaceToUser)(nil))
 
 	models := []interface{}{
-		(*domain.User)(nil),
-		(*domain.Workspace)(nil),
-		(*domain.WorkspaceToUser)(nil),
+		(*postgres.User)(nil),
+		(*postgres.Variable)(nil),
+		(*postgres.Workspace)(nil),
+		(*postgres.Collection)(nil),
 	}
 
 	for _, model := range models {
