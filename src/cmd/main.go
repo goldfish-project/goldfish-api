@@ -5,7 +5,8 @@ import (
 	"github.com/go-pg/pg/v10"
 	"github.com/go-pg/pg/v10/orm"
 	"github.com/gorilla/mux"
-	"goldfish-api/internal/core/domain"
+	"goldfish-api/internal/core/services"
+	"goldfish-api/internal/handlers"
 	"goldfish-api/internal/respositories/postgres"
 	"net/http"
 )
@@ -28,6 +29,16 @@ func main() {
 
 	// create http router
 	router := mux.NewRouter()
+	router = router.PathPrefix("/api").Subrouter()
+
+	// create repositories
+	userRepository := postgres.NewUserRepository(db)
+
+	// create services
+	userService := services.NewService(userRepository)
+
+	// init http handler
+	handlers.NewHTTPUserHandler(router, userService)
 
 	fmt.Println("Starting server on port " + config.Port)
 
@@ -45,19 +56,18 @@ func createSchema(db *pg.DB) error {
 		return "goldfish_" + s
 	})*/
 
-	orm.RegisterTable((*domain.WorkspaceToUser)(nil))
-
 	models := []interface{}{
 		(*postgres.User)(nil),
 		(*postgres.Variable)(nil),
 		(*postgres.Workspace)(nil),
 		(*postgres.Collection)(nil),
+		(*postgres.WorkspaceToUser)(nil),
 	}
 
 	for _, model := range models {
 		err := db.Model(model).CreateTable(&orm.CreateTableOptions{
-			Temp:          true,
-			IfNotExists:   false,
+			Temp:          false,
+			IfNotExists:   true,
 			FKConstraints: true,
 		})
 		if err != nil {

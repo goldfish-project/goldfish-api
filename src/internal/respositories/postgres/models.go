@@ -12,7 +12,7 @@ type User struct {
 	LastName  string
 	Email     string `pg:",pk"`
 	Password  string
-	CreatedOn time.Time
+	CreatedOn time.Time `pg:"default:now()"`
 }
 
 // domain maps the given postgres entity to a domain entity used inside the business layer
