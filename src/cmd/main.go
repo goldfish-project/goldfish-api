@@ -7,6 +7,7 @@ import (
 	"github.com/gorilla/mux"
 	"goldfish-api/internal/core/services"
 	"goldfish-api/internal/handlers"
+	"goldfish-api/internal/handlers/middleware"
 	"goldfish-api/internal/respositories/postgres"
 	"net/http"
 )
@@ -31,11 +32,14 @@ func main() {
 	router := mux.NewRouter()
 	router = router.PathPrefix("/api").Subrouter()
 
+	// create middleware
+	jwtMiddleware := middleware.NewJWTMiddleware(config.JWT.SecretKey, config.JWT.HeaderField, config.JWT.ValidityPeriodInMinutes)
+
 	// create repositories
 	userRepository := postgres.NewUserRepository(db)
 
 	// create services
-	userService := services.NewService(userRepository)
+	userService := services.NewService(userRepository, &jwtMiddleware)
 
 	// init http handler
 	handlers.NewHTTPUserHandler(router, userService)
@@ -59,8 +63,8 @@ func createSchema(db *pg.DB) error {
 	models := []interface{}{
 		(*postgres.User)(nil),
 		(*postgres.Variable)(nil),
-		(*postgres.Workspace)(nil),
 		(*postgres.Collection)(nil),
+		(*postgres.Workspace)(nil),
 		(*postgres.WorkspaceToUser)(nil),
 	}
 

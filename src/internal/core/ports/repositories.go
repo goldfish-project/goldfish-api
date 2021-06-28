@@ -6,8 +6,10 @@ import (
 )
 
 type UserRepository interface {
-	// Get retrieves an user by its email
-	Get(email string) (domain.User, error)
+	// Get retrieves an user by its user id
+	Get(userId uuid.UUID) (domain.User, error)
+	// GetByEmail retrieves an user by its email
+	GetByEmail(email string) (domain.User, error)
 	// Save saves an user to the database
 	Save(user *domain.User) error
 	// Update updates the user's information

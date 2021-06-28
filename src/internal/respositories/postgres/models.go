@@ -8,7 +8,7 @@ import (
 
 type User struct {
 	tableName struct{}
-	UserId uuid.UUID `pg:",pk"`
+	UserId    uuid.UUID `pg:"alias:id,default:uuid_generate_v4(),pk,type:uuid"`
 	FirstName string
 	LastName  string
 	Email     string `pg:",unique"`
@@ -24,7 +24,7 @@ func (u *User) domain() domain.User {
 		Email:     u.Email,
 		Password:  u.Password,
 		CreatedOn: u.CreatedOn,
-		UserId: u.UserId,
+		UserId:    u.UserId,
 	}
 }
 
@@ -32,7 +32,7 @@ type Workspace struct {
 	WorkspaceId   uuid.UUID `pg:"alias:id,default:uuid_generate_v4(),pk,type:uuid"`
 	Name          string
 	CreatedOn     time.Time
-	OwnerUserId    uuid.UUID
+	OwnerUserId   uuid.UUID     `pg:",type:uuid"`
 	Owner         *User         `pg:"rel:has-one"`
 	Collaborators []*User       `pg:"many2many:workspace_to_users"`
 	Variables     []*Variable   `pg:"rel:has-many"`
@@ -72,7 +72,7 @@ func (w *Workspace) domain() domain.Workspace {
 
 type WorkspaceToUser struct {
 	WorkspaceId uuid.UUID
-	UserId   uuid.UUID
+	UserId      uuid.UUID
 }
 
 type Variable struct {

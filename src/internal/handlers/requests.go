@@ -36,3 +36,23 @@ func (req *UserRegisterRequest) ToUser() domain.User {
 		Password:  req.Email,
 	}
 }
+
+type UserAuthenticateRequest struct {
+	Email     string `json:"email"`
+	Password  string `json:"password"`
+}
+
+// IsValid checks whether a given request object is valid or not
+func (req *UserAuthenticateRequest) IsValid() bool {
+	// check if all fields are given
+	if len(req.Email) == 0 || len(req.Password) < 8 {
+		return false
+	}
+
+	//validate email
+	if _, err := mail.ParseAddress(req.Email); err != nil {
+		return false
+	}
+
+	return true
+}
