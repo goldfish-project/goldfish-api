@@ -28,6 +28,16 @@ func (u *User) domain() domain.User {
 	}
 }
 
+// from takes a domain model and converts it into a postgres model
+func (u *User) from(user *domain.User) {
+	u.UserId = user.UserId
+	u.Password = user.Password
+	u.FirstName = user.FirstName
+	u.LastName = user.LastName
+	u.Email = user.Email
+	u.CreatedOn = user.CreatedOn
+}
+
 type Workspace struct {
 	WorkspaceId   uuid.UUID `pg:"alias:id,default:uuid_generate_v4(),pk,type:uuid"`
 	Name          string
@@ -70,6 +80,48 @@ func (w *Workspace) domain() domain.Workspace {
 	}
 }
 
+// from takes a domain model and converts it into a postgres model
+func (w *Workspace) from(workspace *domain.Workspace, ownerId uuid.UUID) Workspace {
+	// convert collaborators
+	var collaborators []*User
+	for _, value := range workspace.Collaborators {
+		user := User{}
+		user.from(&value)
+		collaborators = append(collaborators, &user)
+	}
+
+	// convert variables
+	var variables []*Variable
+	for _, value := range workspace.Variables {
+		variable := Variable{}
+		variable.from(&value, workspace.WorkspaceId)
+		variables = append(variables, &variable)
+	}
+
+	// convert collections
+	var collections []*Collection
+	for _, value := range workspace.Collections {
+		collection := Collection{}
+		collection.from(&value, workspace.WorkspaceId)
+		collections = append(collections, &collection)
+	}
+
+	// convert owner
+	owner := &User{}
+	owner.from(&workspace.Owner)
+
+	return Workspace{
+		WorkspaceId:   workspace.WorkspaceId,
+		Name:          workspace.Name,
+		CreatedOn:     workspace.CreatedOn,
+		OwnerUserId:   ownerId,
+		Owner:         owner,
+		Collaborators: collaborators,
+		Variables:     variables,
+		Collections:   collections,
+	}
+}
+
 type WorkspaceToUser struct {
 	WorkspaceId uuid.UUID
 	UserId      uuid.UUID
@@ -91,6 +143,14 @@ func (v *Variable) domain() domain.Variable {
 	}
 }
 
+// from takes a domain model and converts it into a postgres model
+func (v *Variable) from(variable *domain.Variable, workspaceId uuid.UUID) {
+	v.VariableId = variable.VariableId
+	v.Key = variable.Key
+	v.Value = variable.Value
+	v.WorkspaceId = workspaceId
+}
+
 type Collection struct {
 	CollectionId uuid.UUID `pg:"alias:id,default:uuid_generate_v4(),pk,type:uuid"`
 	Name         string
@@ -103,4 +163,11 @@ func (c *Collection) domain() domain.Collection {
 		CollectionId: c.CollectionId,
 		Name:         c.Name,
 	}
+}
+
+// from takes a domain model and converts it into a postgres model
+func (c *Collection) from(collection *domain.Collection, workspaceId uuid.UUID) {
+	c.CollectionId = collection.CollectionId
+	c.Name = collection.Name
+	c.WorkspaceId = workspaceId
 }

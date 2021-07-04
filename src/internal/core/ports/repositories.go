@@ -20,11 +20,11 @@ type WorkspaceRepository interface {
 	// Get retrieves a workspace by its id
 	Get(workspaceId uuid.UUID) (domain.Workspace, error)
 	// Save creates a new workspace
-	Save(workspace *domain.Workspace, ownerEmail string) error
+	Save(workspace *domain.Workspace, ownerUserId string) error
 	// Delete deletes a given workspace
 	Delete(workspaceId uuid.UUID) error
 	// GetForUser retrieves all workspaces for a given user no matter whether their the owner or an collaborator
-	GetForUser(email string) ([]domain.Workspace, error)
+	GetForUser(userId string) ([]domain.Workspace, error)
 }
 
 type CollectionRepository interface {
