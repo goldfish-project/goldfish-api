@@ -73,5 +73,12 @@ func (repo *WorkspaceRepository) GetForUser(userId string) ([]domain.Workspace, 
 
 	// TODO: select all workspaces where the given user is a collaborator
 
-	return []domain.Workspace{}, nil
+	// map all entries
+	var result []domain.Workspace
+
+	for _, entry := range append(ownWorkspaces, collaboratorWorkspaces...) {
+		result = append(result, entry.domain())
+	}
+
+	return result, nil
 }

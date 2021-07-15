@@ -6,7 +6,6 @@ import (
 )
 
 type User struct {
-	tableName struct{}
 	UserId uuid.UUID
 	FirstName string
 	LastName  string
